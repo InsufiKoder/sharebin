@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>ShareBin</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header>
+      <h1>ShareBin</h1>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <section id="upload">
+        <h2>Upload File</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+          <label for="fileInput">Select a file:</label>
+          <input type="file" id="fileInput" name="file">
+          <button type="submit">Upload</button>
+        </form>
+      </section>
+      <section id="files">
+        <h2>Shared Files</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% fileList.forEach(file => { %>
+              <tr>
+                <td><a href="<%= file.url %>"><%= file.name %></a></td>
+                <td><%= formatBytes(file.size) %></td>
+                <td>
+                  <a href="<%= file.url %>" download>Download</a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <footer>
+      <p>ShareBin &copy; 2023</p>
+    </footer>
+    <script src="/app.js"></script>
+  </body>
+</html>
