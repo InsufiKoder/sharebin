@@ -19,43 +19,16 @@ const upload = multer({
         )}`
       ),
   }),
-  fileFilter: (req, file, cb) => {
-    if (/\.exe$|\.bat$/i.test(file.originalname)) {
-      return cb(new Error("Executables are not allowed"));
-    }
-    cb(null, true);
-  },
-  limits: { fileSize: 250 * 1024 * 1024 },
 }).single("file");
-
-const checkFileRestrictions = (file) => {
-  if (/\.exe$|\.bat$/i.test(file.originalname)) {
-    return "Executables are not allowed";
-  }
-  if (file.size > 250 * 1024 * 1024) {
-    return "File size is too large";
-  }
-  return null;
-};
 
 app.post("/upload", (req, res) => {
   upload(req, res, (err) => {
     if (err) {
-      if (err instanceof multer.MulterError) {
-        if (err.code === "LIMIT_FILE_SIZE") {
-          return res.status(400).send("File too large");
-        }
-      }
       return res.status(500).send("Internal server error");
-    }
-    const error = checkFileRestrictions(req.file);
-    if (error) {
-      fs.unlinkSync(req.file.path);
-      return res.status(400).send(error);
     }
     const fileInfo = {
       name: req.file.originalname,
-      size: req.file.size,
+      size: req.file.size.toString(),
       url: `/uploads/${req.file.filename}`,
     };
     res.json(fileInfo);
@@ -70,11 +43,16 @@ app.get("/uploads/:filename", (req, res) => {
 
 app.get("/", (req, res) => {
   const files = fs.readdirSync(path.join(__dirname, "uploads"));
-  const fileList = files.map((file) => ({
-    name: file,
-    url: `/uploads/${file}`,
-  }));
-  res.render("index", { fileList }); // Ensure fileList is passed to the template
+  const fileList = files.map((file) => {
+    const filePath = path.join(__dirname, "uploads", file);
+    const stats = fs.statSync(filePath);
+    return {
+      name: file,
+      size: stats.size,
+      url: `/uploads/${file}`,
+    };
+  });
+  res.render("index", { fileList });
 });
 
 app.get("/about", (req, res) => {
@@ -92,11 +70,6 @@ app.locals.formatBytes = (bytes, decimals = 2) => {
 // Error handler middleware
 app.use((err, req, res, next) => {
   if (err) {
-    if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).send("File too large");
-    } else if (/.exe$|.bat$/i.test(err.message)) {
-      return res.status(400).send("Executables are not allowed");
-    }
     return res.status(500).send("Internal server error");
   }
 });
