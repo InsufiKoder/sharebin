@@ -7,6 +7,8 @@ ShareBin is an anonymous file hosting platform created by UnusefulCoder. It allo
 
 - Simple and easy to use interface
 - Anonymous file uploading and sharing
+- 250MB File Size Limit
+- Restrictions for .exe, .bat and .com Files
 
 ## Technologies Used
 
