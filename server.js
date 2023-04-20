@@ -62,3 +62,7 @@ if (!config.expirationDisabled) {
     });
   });
 }
+
+console.log(
+  "Check app.js to change the file size limit or disable it entirely"
+);

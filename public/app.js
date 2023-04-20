@@ -1,12 +1,15 @@
 const form = document.getElementById("uploadForm");
 const fileSizeError = document.getElementById("fileSizeError");
 
+const fileSizeLimit = false;
+const maxFileSizeKB = 256000;
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   fileSizeError.style.display = "none";
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
-  if (file.size > 250 * 1024 * 1024) {
+  if (!fileSizeLimit && file.size > maxFileSizeKB * 1024) {
     fileSizeError.style.display = "block";
     return;
   }

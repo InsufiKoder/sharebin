@@ -1,5 +1,5 @@
 {
-    "FILES_PER_PAGE": 10,
+    "FILES_PER_PAGE": 5,
     "expirationDays": 7,
     "expirationDisabled": false,
     "port": 3000
