@@ -38,17 +38,32 @@
             </tr>
           </thead>
           <tbody>
-            <% fileList.forEach(file => { %>
-              <tr>
-                <td><a href="<%= file.url %>"><%= file.name %></a></td>
-                <td><%= formatBytes(file.size) %></td>
-                <td>
-                  <a href="<%= file.url %>" download>Download</a>
-                </td>
+            <% for (let i = 0; i < fileList.length; i++) { 
+              const file = fileList[i];
+              if (i % 10 === 0) { %>
+              <tr class="pagebreak">
+              <% } %>
+                <tr>
+                  <td><a href="<%= file.url %>"><%= file.name %></a></td>
+                  <td><%= formatBytes(file.size) %></td>
+                  <td>
+                    <a href="<%= file.url %>" download>Download</a>
+                  </td>
+                </tr>
+              <% if ((i+1) % 10 === 0 || i === fileList.length-1) { %>
               </tr>
-            <% }); %>
+              <% } %>
+            <% } %>
           </tbody>
         </table>
+        <div class="pagination">
+          <% if (currentPage > 1) { %>
+          <a href="/?page=<%= currentPage - 1 %>" class="previous">&laquo; Previous</a>
+          <% } %>
+          <% if (currentPage < totalPages) { %>
+          <a href="/?page=<%= currentPage + 1 %>" class="next">Next &raquo;</a>
+          <% } %>
+        </div>
       </section>
     </main>
     <footer>

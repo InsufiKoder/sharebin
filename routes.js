@@ -17,6 +17,8 @@ const upload = multer({
   }),
 }).single("file");
 
+const FILES_PER_PAGE = 10;
+
 router.post("/upload", (req, res) => {
   upload(req, res, (err) => {
     if (err) {
@@ -48,7 +50,21 @@ router.get("/", (req, res) => {
       url: `/uploads/${file}`,
     };
   });
-  res.render("index", { fileList });
+
+  // get page query parameter or default to 1
+  const page = parseInt(req.query.page) || 1;
+
+  // calculate start and end indices of files to show on the page
+  const startIdx = (page - 1) * FILES_PER_PAGE;
+  const endIdx = startIdx + FILES_PER_PAGE;
+
+  // slice the fileList array to show only the files for the current page
+  const filesToShow = fileList.slice(startIdx, endIdx);
+
+  // calculate total number of pages
+  const totalPages = Math.ceil(fileList.length / FILES_PER_PAGE);
+
+  res.render("index", { fileList: filesToShow, totalPages, currentPage: page });
 });
 
 router.get("/about", (req, res) => {
