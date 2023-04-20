@@ -43,20 +43,22 @@ app.listen(port, () => {
 
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json")));
 
-// Schedule a cron job to delete files older than the specified number of days
-cron.schedule("* * * * *", () => {
-  const directory = path.join(__dirname, "public/uploads");
-  const files = fs.readdirSync(directory);
-  const currentTime = new Date();
-  const expirationDate = new Date();
-  expirationDate.setDate(currentTime.getDate() - config.expirationDays);
+if (!config.expirationDisabled) {
+  // Schedule a cron job to delete files older than the specified number of days
+  cron.schedule("* * * * *", () => {
+    const directory = path.join(__dirname, "public/uploads");
+    const files = fs.readdirSync(directory);
+    const currentTime = new Date();
+    const expirationDate = new Date();
+    expirationDate.setDate(currentTime.getDate() - config.expirationDays);
 
-  files.forEach((file) => {
-    const filePath = path.join(directory, file);
-    const fileStat = fs.statSync(filePath);
-    if (fileStat.isFile() && fileStat.mtime < expirationDate) {
-      fs.unlinkSync(filePath);
-      console.log(`Deleted file: ${filePath}`);
-    }
+    files.forEach((file) => {
+      const filePath = path.join(directory, file);
+      const fileStat = fs.statSync(filePath);
+      if (fileStat.isFile() && fileStat.mtime < expirationDate) {
+        fs.unlinkSync(filePath);
+        console.log(`Deleted file: ${filePath}`);
+      }
+    });
   });
-});
+}
