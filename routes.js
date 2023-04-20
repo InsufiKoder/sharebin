@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const { FILES_PER_PAGE } = require("./config.json");
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -16,8 +17,6 @@ const upload = multer({
       ),
   }),
 }).single("file");
-
-const FILES_PER_PAGE = 10;
 
 router.post("/upload", (req, res) => {
   upload(req, res, (err) => {
@@ -41,7 +40,17 @@ router.get("/uploads/:filename", (req, res) => {
 
 router.get("/", (req, res) => {
   const files = fs.readdirSync(path.join(__dirname, "uploads"));
-  const fileList = files.map((file) => {
+  const totalFiles = files.length;
+  const totalPages = Math.ceil(totalFiles / FILES_PER_PAGE);
+  let page = req.query.page || 1;
+  if (page < 1) {
+    page = 1;
+  } else if (page > totalPages) {
+    page = totalPages;
+  }
+  const startIndex = (page - 1) * FILES_PER_PAGE;
+  const endIndex = startIndex + FILES_PER_PAGE;
+  const fileList = files.slice(startIndex, endIndex).map((file) => {
     const filePath = path.join(__dirname, "uploads", file);
     const stats = fs.statSync(filePath);
     return {
@@ -50,21 +59,7 @@ router.get("/", (req, res) => {
       url: `/uploads/${file}`,
     };
   });
-
-  // get page query parameter or default to 1
-  const page = parseInt(req.query.page) || 1;
-
-  // calculate start and end indices of files to show on the page
-  const startIdx = (page - 1) * FILES_PER_PAGE;
-  const endIdx = startIdx + FILES_PER_PAGE;
-
-  // slice the fileList array to show only the files for the current page
-  const filesToShow = fileList.slice(startIdx, endIdx);
-
-  // calculate total number of pages
-  const totalPages = Math.ceil(fileList.length / FILES_PER_PAGE);
-
-  res.render("index", { fileList: filesToShow, totalPages, currentPage: page });
+  res.render("index", { fileList, totalPages, currentPage: page });
 });
 
 router.get("/about", (req, res) => {
