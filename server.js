@@ -2,6 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const path = require("path");
 const fs = require("fs");
+const cron = require("node-cron"); // Added for scheduling tasks
 
 const app = express();
 
@@ -38,4 +39,22 @@ const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
+});
+
+// Schedule a cron job to delete files older than 1 week
+cron.schedule("* * * * *", () => {
+  const directory = path.join(__dirname, "public/uploads");
+  const files = fs.readdirSync(directory);
+  const currentTime = new Date();
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(currentTime.getDate() - 7);
+
+  files.forEach((file) => {
+    const filePath = path.join(directory, file);
+    const fileStat = fs.statSync(filePath);
+    if (fileStat.isFile() && fileStat.mtime < oneWeekAgo) {
+      fs.unlinkSync(filePath);
+      console.log(`Deleted file: ${filePath}`);
+    }
+  });
 });
