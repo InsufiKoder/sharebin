@@ -2,7 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const path = require("path");
 const fs = require("fs");
-const cron = require("node-cron"); // Added for scheduling tasks
+const cron = require("node-cron");
 
 const app = express();
 
@@ -32,8 +32,8 @@ app.use(
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-const routes = require("./routes"); // Importing routes from routes.js
-app.use(routes); // Using routes in the app
+const routes = require("./routes");
+app.use(routes);
 
 const port = process.env.PORT || 3000;
 
@@ -41,18 +41,20 @@ app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
 
-// Schedule a cron job to delete files older than 1 week
+const config = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json")));
+
+// Schedule a cron job to delete files older than the specified number of days
 cron.schedule("* * * * *", () => {
   const directory = path.join(__dirname, "public/uploads");
   const files = fs.readdirSync(directory);
   const currentTime = new Date();
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(currentTime.getDate() - 7);
+  const expirationDate = new Date();
+  expirationDate.setDate(currentTime.getDate() - config.expirationDays);
 
   files.forEach((file) => {
     const filePath = path.join(directory, file);
     const fileStat = fs.statSync(filePath);
-    if (fileStat.isFile() && fileStat.mtime < oneWeekAgo) {
+    if (fileStat.isFile() && fileStat.mtime < expirationDate) {
       fs.unlinkSync(filePath);
       console.log(`Deleted file: ${filePath}`);
     }
