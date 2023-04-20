@@ -1,6 +1,7 @@
 {
     "FILES_PER_PAGE": 10,
     "expirationDays": 7,
-    "expirationDisabled": false
+    "expirationDisabled": false,
+    "port": 3000
 }
   

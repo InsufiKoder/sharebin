@@ -35,13 +35,13 @@ app.set("view engine", "ejs");
 const routes = require("./routes");
 app.use(routes);
 
-const port = process.env.PORT || 3000;
+const config = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json")));
+
+const port = config.port || 3000;
 
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
-
-const config = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json")));
 
 if (!config.expirationDisabled) {
   // Schedule a cron job to delete files older than the specified number of days
