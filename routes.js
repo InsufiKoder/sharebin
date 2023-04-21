@@ -40,7 +40,20 @@ router.get("/uploads/:filename", (req, res) => {
 
 router.get("/", (req, res) => {
   const files = fs.readdirSync(path.join(__dirname, "uploads"));
-  const totalFiles = files.length;
+  const fileList = files
+    .map((file) => {
+      const filePath = path.join(__dirname, "uploads", file);
+      const stats = fs.statSync(filePath);
+      return {
+        name: file,
+        size: stats.size,
+        url: `/uploads/${file}`,
+        createdAt: stats.birthtimeMs,
+      };
+    })
+    .sort((a, b) => b.createdAt - a.createdAt);
+
+  const totalFiles = fileList.length;
   const totalPages = Math.ceil(totalFiles / FILES_PER_PAGE);
   let page = req.query.page || 1;
   if (page < 1) {
@@ -50,16 +63,8 @@ router.get("/", (req, res) => {
   }
   const startIndex = (page - 1) * FILES_PER_PAGE;
   const endIndex = startIndex + FILES_PER_PAGE;
-  const fileList = files.slice(startIndex, endIndex).map((file) => {
-    const filePath = path.join(__dirname, "uploads", file);
-    const stats = fs.statSync(filePath);
-    return {
-      name: file,
-      size: stats.size,
-      url: `/uploads/${file}`,
-    };
-  });
-  res.render("index", { fileList, totalPages, currentPage: page });
+  const pageFiles = fileList.slice(startIndex, endIndex);
+  res.render("index", { fileList: pageFiles, totalPages, currentPage: page });
 });
 
 router.get("/about", (req, res) => {
