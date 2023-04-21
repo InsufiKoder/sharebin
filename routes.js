@@ -3,18 +3,14 @@ const router = express.Router();
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const shortid = require("shortid");
 const { FILES_PER_PAGE } = require("./config.json");
 
 const upload = multer({
   storage: multer.diskStorage({
     destination: "uploads/",
     filename: (req, file, cb) =>
-      cb(
-        null,
-        `${path.parse(file.originalname).name}-${Date.now()}${path.extname(
-          file.originalname
-        )}`
-      ),
+      cb(null, `${shortid.generate()}${path.extname(file.originalname)}`),
   }),
 }).single("file");
 
